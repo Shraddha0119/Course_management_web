@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import AIChatPanel from "./AIChatPanel";
 
-
-
-
 /**
  * AIChatbot - floating AI assistant button (bottom-right) available on
  * every page after login. Renders a reusable AIChatPanel inside a
