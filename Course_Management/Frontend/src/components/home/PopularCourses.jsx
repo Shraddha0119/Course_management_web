@@ -13,9 +13,17 @@ function PopularCourses({ limit = 6 }) {
       try {
         const { data } = await api.get("/courses");
         setCourses(data.slice(0, limit));
+      // } 
+      // catch (err) {
+      //   console.error("Failed to load courses", err);
+      // } 
       } catch (err) {
-        console.error("Failed to load courses", err);
-      } finally {
+  console.error("COURSE ERROR:", err);
+  console.error("MESSAGE:", err.message);
+  console.error("STATUS:", err.response?.status);
+  console.error("DATA:", err.response?.data);
+}
+      finally {
         setLoading(false);
       }
     };
