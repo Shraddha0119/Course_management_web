@@ -26,8 +26,6 @@ function AIChatbot() {
     setMinimized(false);
   };
   
-
-  
   return (
     <>
       {/* Floating button */}
