@@ -25,6 +25,7 @@ function AIChatbot() {
     setOpen(!open);
     setMinimized(false);
   };
+  
 
   return (
     <>
