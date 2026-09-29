@@ -44,6 +44,7 @@ function AIChatbot() {
           </svg>
         )}
       </button>
+      
 
       {/* Chat window */}
       {open && (
