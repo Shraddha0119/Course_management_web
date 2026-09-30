@@ -46,8 +46,6 @@ function AIChatbot() {
         )}
       </button>
       
-
-      
       {/* Chat window */}
       {open && (
         <div
