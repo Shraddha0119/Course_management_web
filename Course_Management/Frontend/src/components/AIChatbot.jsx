@@ -93,7 +93,6 @@ function AIChatbot() {
         </div>
       )}
     </>
-    
   );
 }
 
