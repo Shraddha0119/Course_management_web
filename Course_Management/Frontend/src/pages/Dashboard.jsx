@@ -18,8 +18,14 @@ function Dashboard() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      const { data } = await api.getCached("/courses");
-      setCourses(data);
+      const { data } = await api.getCached("/courses", {
+        params: { limit: 50 },
+      });
+      const courseList = Array.isArray(data) ? data : data?.courses;
+      if (!Array.isArray(courseList)) {
+        throw new Error("Unexpected response from the courses service");
+      }
+      setCourses(courseList);
     } catch (err) {
       console.error("Failed to load courses", err);
     } finally {

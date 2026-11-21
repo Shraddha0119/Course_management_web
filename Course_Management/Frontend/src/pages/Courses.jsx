@@ -20,11 +20,19 @@ function Courses() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      const { data } = await api.getCached("/courses");
-      setCourses(data);
+      const { data } = await api.getCached("/courses", {
+        params: { limit: 50 },
+      });
+      const courseList = Array.isArray(data) ? data : data?.courses;
+      if (!Array.isArray(courseList)) {
+        throw new Error("Unexpected response from the courses service");
+      }
+      setCourses(courseList);
       setError(null);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to load courses");
+      setError(
+        err.response?.data?.message || err.message || "Failed to load courses"
+      );
     } finally {
       setLoading(false);
     }

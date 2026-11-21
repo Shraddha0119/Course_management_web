@@ -1,5 +1,5 @@
-import React, { Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React, { Suspense, useLayoutEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -19,11 +19,22 @@ const CreateCourse = React.lazy(() => import("../pages/CreateCourse"));
 const EditCourse = React.lazy(() => import("../pages/EditCourse"));
 const NotFound = React.lazy(() => import("../pages/NotFound"));
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function AppRoutes() {
   const fallback = <Loader label="Loading..." />;
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<MainLayout><Suspense fallback={fallback}><Home /></Suspense></MainLayout>} />

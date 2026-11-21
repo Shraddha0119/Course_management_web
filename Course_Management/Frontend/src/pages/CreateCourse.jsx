@@ -109,6 +109,7 @@ const fetchInstructors = async () => {
       }
 
       const { data } = await api.post("/courses", payload);
+      api.invalidateCachePattern("/courses");
       toast.success("Course created successfully! 🎉");
       navigate(`/courses/${data.course._id}`);
     } catch (error) {

@@ -7,28 +7,31 @@ import Section from "./Section";
 function PopularCourses({ limit = 6 }) {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     const fetchCourses = async () => {
+      setLoading(true);
+      setLoadError(false);
       try {
-        const { data } = await api.get("/courses");
-        setCourses(data.slice(0, limit));
-      // } 
-      // catch (err) {
-      //   console.error("Failed to load courses", err);
-      // } 
-      } catch (err) {
-  console.error("COURSE ERROR:", err);
-  console.error("MESSAGE:", err.message);
-  console.error("STATUS:", err.response?.status);
-  console.error("DATA:", err.response?.data);
-}
-      finally {
+        const { data } = await api.getCached("/courses", {
+          params: { limit },
+        });
+        const courseList = Array.isArray(data) ? data : data?.courses;
+        if (!Array.isArray(courseList)) {
+          throw new Error("Unexpected response from the courses service");
+        }
+        setCourses(courseList.slice(0, limit));
+      } catch {
+        setCourses([]);
+        setLoadError(true);
+      } finally {
         setLoading(false);
       }
     };
     fetchCourses();
-  }, [limit]);
+  }, [limit, retryCount]);
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-16 bg-gray-50 dark:bg-gray-900/40">
@@ -54,6 +57,21 @@ function PopularCourses({ limit = 6 }) {
             </div>
           ))}
         </div>
+      ) : loadError ? (
+        <div className="py-10 text-center text-gray-600 dark:text-gray-300">
+          <p>Courses couldn&apos;t be loaded right now.</p>
+          <button
+            type="button"
+            onClick={() => setRetryCount((count) => count + 1)}
+            className="mt-3 font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+          >
+            Try again
+          </button>
+        </div>
+      ) : courses.length === 0 ? (
+        <p className="py-10 text-center text-gray-500 dark:text-gray-400">
+          No courses are available yet.
+        </p>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

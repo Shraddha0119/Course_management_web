@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 
 // Simple in-memory cache with TTL support
 class ApiCache {

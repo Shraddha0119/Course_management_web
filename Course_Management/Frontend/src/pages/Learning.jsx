@@ -464,7 +464,7 @@ function Learning() {
             <div className="mb-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl p-4 flex items-center gap-3 shadow-lg">
               <span className="text-3xl">✨</span>
               <div>
-                <p className="font-bold">AI-Generated Learning Path</p>
+                <p className="font-bold">Learning Path</p>
                 <p className="text-sm text-purple-100">
                   This course was auto-built for you. {course?.sections?.length} modules • {allLessons.length} lessons
                 </p>

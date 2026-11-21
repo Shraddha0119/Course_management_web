@@ -55,6 +55,7 @@ function EditCourse() {
         price: Number(form.price),
       };
       await api.put(`/courses/${id}`, payload);
+      api.invalidateCachePattern("/courses");
       toast.success("Course updated successfully! ✏️");
       navigate(`/courses/${id}`);
     } catch (err) {
