@@ -30,4 +30,8 @@ const assignmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Add indexes for better query performance
+assignmentSchema.index({ course: 1, sectionIndex: 1 });
+assignmentSchema.index({ "submissions.student": 1 });
+
 export default mongoose.model("Assignment", assignmentSchema);

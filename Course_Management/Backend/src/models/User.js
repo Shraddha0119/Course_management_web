@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
 
-isActive: {
+    isActive: {
       type: Boolean,
       default: true,
     },
@@ -60,5 +60,10 @@ isActive: {
   },
   { timestamps: true }
 );
+
+// Add indexes for better query performance
+userSchema.index({ role: 1, isActive: 1 });
+userSchema.index({ email: 1 });
+userSchema.index({ "badges.name": 1 });
 
 export default mongoose.model("User", userSchema);

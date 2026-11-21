@@ -24,4 +24,8 @@ const discussionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Add indexes for better query performance
+discussionSchema.index({ course: 1, createdAt: -1 });
+discussionSchema.index({ user: 1, createdAt: -1 });
+
 export default mongoose.model("Discussion", discussionSchema);

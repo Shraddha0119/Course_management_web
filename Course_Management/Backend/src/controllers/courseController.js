@@ -49,16 +49,36 @@ export const createCourse = async (req, res) => {
   }
 };
 
-// Get All Courses (Public) - support search & category filter
+// Get All Courses (Public) - support search & category filter with pagination
 export const getAllCourses = async (req, res) => {
   try {
-    const { search, category } = req.query;
+    const { search, category, page = 1, limit = 12, sort = "-createdAt" } = req.query;
     const filter = { status: "Active" };
     if (search) filter.title = { $regex: search, $options: "i" };
     if (category) filter.category = category;
 
-    const courses = await Course.find(filter).populate("instructor", "name email");
-    res.status(200).json(courses);
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
+    const skip = (pageNum - 1) * limitNum;
+
+    const [courses, total] = await Promise.all([
+      Course.find(filter)
+        .populate("instructor", "name email")
+        .sort(sort)
+        .skip(skip)
+        .limit(limitNum),
+      Course.countDocuments(filter),
+    ]);
+
+    res.status(200).json({
+      courses,
+      pagination: {
+        currentPage: pageNum,
+        totalPages: Math.ceil(total / limitNum),
+        totalCourses: total,
+        hasMore: pageNum * limitNum < total,
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

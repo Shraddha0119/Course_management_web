@@ -54,5 +54,10 @@ const enrollmentSchema = new mongoose.Schema(
 
 // Unique constraint: one enrollment per student per course
 enrollmentSchema.index({ student: 1, course: 1 }, { unique: true });
+// Indexes for common queries
+enrollmentSchema.index({ student: 1, status: 1 });
+enrollmentSchema.index({ course: 1, status: 1 });
+enrollmentSchema.index({ student: 1, createdAt: -1 });
+enrollmentSchema.index({ progress: -1 });
 
 export default mongoose.model("Enrollment", enrollmentSchema);

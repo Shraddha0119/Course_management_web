@@ -22,4 +22,7 @@ const quizSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Add indexes for better query performance
+quizSchema.index({ course: 1, sectionIndex: 1 });
+
 export default mongoose.model("Quiz", quizSchema);
