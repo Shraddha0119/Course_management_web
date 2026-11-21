@@ -63,10 +63,12 @@ export const getAllCourses = async (req, res) => {
 
     const [courses, total] = await Promise.all([
       Course.find(filter)
-        .populate("instructor", "name email")
+        .select("-sections -reviews -__v")
+        .populate("instructor", "name")
         .sort(sort)
         .skip(skip)
-        .limit(limitNum),
+        .limit(limitNum)
+        .lean(),
       Course.countDocuments(filter),
     ]);
 
