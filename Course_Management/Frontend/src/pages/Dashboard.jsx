@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
-import Loader from "../components/Loader";
+import { CourseGridSkeleton, DashboardStatsSkeleton } from "../components/Loader";
 import Sidebar from "../components/Sidebar";
 import CourseCard from "../components/CourseCard";
 
@@ -18,7 +18,7 @@ function Dashboard() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get("/courses");
+      const { data } = await api.getCached("/courses");
       setCourses(data);
     } catch (err) {
       console.error("Failed to load courses", err);
@@ -28,10 +28,15 @@ function Dashboard() {
   };
 
   // For instructors: show their own courses. For admin: show all.
-  const myCourses =
-    user?.role === "instructor"
-      ? courses.filter((c) => c.instructor?._id === user.id || c.instructor?._id === user._id)
-      : courses;
+  const myCourses = useMemo(
+    () =>
+      user?.role === "instructor"
+        ? courses.filter(
+            (c) => c.instructor?._id === user.id || c.instructor?._id === user._id
+          )
+        : courses,
+    [courses, user?.role, user?.id, user?._id]
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -43,20 +48,24 @@ function Dashboard() {
         </p>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-blue-600 text-white rounded-xl p-5">
-            <p className="text-4xl font-bold">{myCourses.length}</p>
-            <p className="mt-1 text-blue-100">My Courses</p>
+        {loading ? (
+          <DashboardStatsSkeleton />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div className="bg-blue-600 text-white rounded-xl p-5">
+              <p className="text-4xl font-bold">{myCourses.length}</p>
+              <p className="mt-1 text-blue-100">My Courses</p>
+            </div>
+            <div className="bg-green-600 text-white rounded-xl p-5">
+              <p className="text-4xl font-bold">{courses.length}</p>
+              <p className="mt-1 text-green-100">Total Courses</p>
+            </div>
+            <div className="bg-purple-600 text-white rounded-xl p-5">
+              <p className="text-4xl font-bold capitalize">{user?.role}</p>
+              <p className="mt-1 text-purple-100">Role</p>
+            </div>
           </div>
-          <div className="bg-green-600 text-white rounded-xl p-5">
-            <p className="text-4xl font-bold">{courses.length}</p>
-            <p className="mt-1 text-green-100">Total Courses</p>
-          </div>
-          <div className="bg-purple-600 text-white rounded-xl p-5">
-            <p className="text-4xl font-bold capitalize">{user?.role}</p>
-            <p className="mt-1 text-purple-100">Role</p>
-          </div>
-        </div>
+        )}
 
         {/* Actions */}
         <div className="flex flex-wrap gap-3 mb-8">
@@ -80,7 +89,7 @@ function Dashboard() {
         </h2>
 
         {loading ? (
-          <Loader label="Loading..." />
+          <CourseGridSkeleton count={6} />
         ) : myCourses.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-xl shadow">
             <p className="text-4xl mb-3">📭</p>

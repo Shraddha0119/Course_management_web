@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
-import Loader from "../components/Loader";
+import { CourseGridSkeleton } from "../components/Loader";
 
 function MyCourses() {
   const [courses, setCourses] = useState([]);
@@ -15,7 +15,7 @@ function MyCourses() {
   const fetchMyCourses = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get("/enroll/my-courses");
+      const { data } = await api.getCached("/enroll/my-courses");
       setCourses(data.courses || []);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load your courses");
@@ -39,7 +39,7 @@ function MyCourses() {
       <p className="text-gray-500 mb-8">Continue learning where you left off</p>
 
       {loading ? (
-        <Loader label="Loading your courses..." />
+        <CourseGridSkeleton count={6} />
       ) : error ? (
         <div className="text-center py-16"><p className="text-red-500">{error}</p></div>
       ) : courses.length === 0 ? (
@@ -58,7 +58,7 @@ function MyCourses() {
               {/* Thumbnail */}
               <div className="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-4xl font-bold">
                 {course.thumbnail ? (
-                  <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                  <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" loading="lazy" />
                 ) : (
                   <span>{course.title?.charAt(0).toUpperCase()}</span>
                 )}

@@ -1,12 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
-import Loader from "../components/Loader";
+import { StudentDashboardSkeleton } from "../components/Loader";
 import AIChatPanel from "../components/AIChatPanel";
 import { getWeeklyActivity, getWeeklyTotal } from "../utils/weeklyActivity";
 import { BADGE_DEFS, badgeByKey } from "../utils/badges";
-import { toast } from "react-hot-toast";
+
+// Helper to compute badges from stats (kept local to avoid import cycle)
+function computeFromStats(stats) {
+  const earned = [];
+  const add = (key) => {
+    if (!earned.some((b) => b.key === key)) earned.push(badgeByKey(key));
+  };
+  if ((stats.lessonsCompleted || 0) >= 1) add("first_lesson");
+  if ((stats.lessonsCompleted || 0) >= 3) add("fast_learner");
+  if ((stats.quizzesPassed || 0) >= 1) add("first_quiz");
+  if ((stats.quizzesPassed || 0) >= 3) add("quiz_master");
+  if ((stats.bestQuizScore || 0) >= 90) add("top_performer");
+  if ((stats.assignmentsSubmitted || 0) >= 1) add("first_assignment");
+  if ((stats.coursesCompleted || 0) >= 1) add("course_completed");
+  return earned;
+}
 
 function StudentDashboard() {
   const { user } = useAuth();
@@ -24,9 +39,9 @@ function StudentDashboard() {
     try {
       setLoading(true);
       const [coursesRes, notifRes, profileRes] = await Promise.all([
-        api.get("/enroll/my-courses"),
-        api.get("/notifications"),
-        api.get("/users/profile"),
+        api.getCached("/enroll/my-courses"),
+        api.getCached("/notifications"),
+        api.getCached("/users/profile"),
       ]);
       setCourses(coursesRes.data.courses || []);
       setNotifications(notifRes.data || []);
@@ -39,44 +54,85 @@ function StudentDashboard() {
     }
   };
 
-  if (loading) return <Loader label="Loading dashboard..." />;
-
-  const completed = courses.filter((c) => c.status === "Completed");
-  const inProgress = courses.filter((c) => c.status === "In Progress");
-  const avgProgress = courses.length
-    ? Math.round(courses.reduce((a, c) => a + (c.progress || 0), 0) / courses.length)
-    : 0;
+  // Memoize expensive computations - MUST be before early return
+  const completed = useMemo(
+    () => courses.filter((c) => c.status === "Completed"),
+    [courses]
+  );
+  const inProgress = useMemo(
+    () => courses.filter((c) => c.status === "In Progress"),
+    [courses]
+  );
+  const avgProgress = useMemo(
+    () =>
+      courses.length
+        ? Math.round(
+            courses.reduce((a, c) => a + (c.progress || 0), 0) / courses.length
+          )
+        : 0,
+    [courses]
+  );
 
   // User's earned badges (from profile)
-  const userBadges = profile?.badges || [];
-  const earnedKeys = new Set(userBadges.map((b) => b.name));
+  const userBadges = useMemo(() => profile?.badges || [], [profile]);
+  const earnedKeys = useMemo(
+    () => new Set(userBadges.map((b) => b.name)),
+    [userBadges]
+  );
   const allBadges = BADGE_DEFS;
 
   // Learning hours estimate (10 min per completed lesson)
-  const totalLessonsComplete = courses.reduce((a, c) => a + (c.progress ? Math.round(c.progress / 100 * 20) : 0), 0);
+  const totalLessonsComplete = useMemo(
+    () =>
+      courses.reduce(
+        (a, c) => a + (c.progress ? Math.round(c.progress / 100 * 20) : 0),
+        0
+      ),
+    [courses]
+  );
   const learningMinutes = totalLessonsComplete * 10;
-  const learningHours = (learningMinutes / 60).toFixed(1);
+  const learningHours = useMemo(
+    () => (learningMinutes / 60).toFixed(1),
+    [learningMinutes]
+  );
 
   // Quiz pass rate
-  const quizResults = courses.flatMap((c) => c.quizResults || []);
-  const quizzesPassed = quizResults.filter((q) => q.passed).length;
-  const quizTotal = quizResults.length;
+  const quizResults = useMemo(
+    () => courses.flatMap((c) => c.quizResults || []),
+    [courses]
+  );
+  const quizzesPassed = useMemo(
+    () => quizResults.filter((q) => q.passed).length,
+    [quizResults]
+  );
+  const quizTotal = useMemo(() => quizResults.length, [quizResults]);
 
   // Assignments submitted
-  const assignmentsSubmitted = courses.reduce((acc, c) => acc + (c.assignmentsSubmitted || 0), 0);
+  const assignmentsSubmitted = useMemo(
+    () => courses.reduce((acc, c) => acc + (c.assignmentsSubmitted || 0), 0),
+    [courses]
+  );
 
   const weeklyTotal = getWeeklyTotal();
-  const maxWeekly = Math.max(...weekly.map((d) => d.count), 1);
+  const maxWeekly = useMemo(
+    () => Math.max(...weekly.map((d) => d.count), 1),
+    [weekly]
+  );
 
-  const stats = {
-    lessonsCompleted: totalLessonsComplete,
-    quizzesPassed,
-    bestQuizScore: Math.max(0, ...quizResults.map((q) => q.percentage || 0)),
-    assignmentsSubmitted,
-    coursesCompleted: completed.length,
-  };
+  const stats = useMemo(
+    () => ({
+      lessonsCompleted: totalLessonsComplete,
+      quizzesPassed,
+      bestQuizScore: Math.max(0, ...quizResults.map((q) => q.percentage || 0)),
+      assignmentsSubmitted,
+      coursesCompleted: completed.length,
+    }),
+    [totalLessonsComplete, quizzesPassed, quizResults, assignmentsSubmitted, completed.length]
+  );
 
-  const earnedBadges = computeFromStats(stats);
+  const earnedBadges = useMemo(() => computeFromStats(stats), [stats]);
+
+  if (loading) return <StudentDashboardSkeleton />;
 
   return (
     <div className="animate-fadeInUp">
@@ -285,23 +341,7 @@ function StudentDashboard() {
     </div>
   );
 }
-
-// Helper to compute badges from stats (kept local to avoid import cycle)
-function computeFromStats(stats) {
-  const earned = [];
-  const add = (key) => {
-    if (!earned.some((b) => b.key === key)) earned.push(badgeByKey(key));
-  };
-  if ((stats.lessonsCompleted || 0) >= 1) add("first_lesson");
-  if ((stats.lessonsCompleted || 0) >= 3) add("fast_learner");
-  if ((stats.quizzesPassed || 0) >= 1) add("first_quiz");
-  if ((stats.quizzesPassed || 0) >= 3) add("quiz_master");
-  if ((stats.bestQuizScore || 0) >= 90) add("top_performer");
-  if ((stats.assignmentsSubmitted || 0) >= 1) add("first_assignment");
-  if ((stats.coursesCompleted || 0) >= 1) add("course_completed");
-  return earned;
-}
-
+ 
 function StatCard({ icon, label, value, color }) {
   return (
     <div className={`bg-gradient-to-br ${color} text-white rounded-2xl p-5 shadow hover:shadow-lg transition-shadow animate-scaleIn`}>

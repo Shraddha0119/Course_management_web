@@ -80,7 +80,7 @@ function Learning() {
         courseData = { ...courseData, sections: path };
         // Count generated lessons for the lock map
         setGenerated(true);
-        toast.success("✨ AI-generated learning path created for this course!");
+        toast.success("✨ let started to solve modules and lessons");
       }
 
       setCourse(courseData);

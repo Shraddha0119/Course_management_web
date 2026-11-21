@@ -1,6 +1,7 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 
-function CourseCard({ course }) {
+const CourseCard = memo(function CourseCard({ course }) {
   return (
     <Link
       to={`/courses/${course._id}`}
@@ -13,6 +14,7 @@ function CourseCard({ course }) {
             src={course.thumbnail}
             alt={course.title}
             className="w-full h-full object-cover"
+            loading="lazy"
           />
         ) : (
           <span>{course.title?.charAt(0).toUpperCase()}</span>
@@ -56,7 +58,7 @@ function CourseCard({ course }) {
       </div>
     </Link>
   );
-}
+});
 
 export default CourseCard;
 

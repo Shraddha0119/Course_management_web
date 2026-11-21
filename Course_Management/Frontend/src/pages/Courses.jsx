@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../services/api";
 import CourseCard from "../components/CourseCard";
-import Loader from "../components/Loader";
+import { CourseGridSkeleton } from "../components/Loader";
 
 function Courses() {
   const [courses, setCourses] = useState([]);
@@ -20,7 +20,7 @@ function Courses() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get("/courses");
+      const { data } = await api.getCached("/courses");
       setCourses(data);
       setError(null);
     } catch (err) {
@@ -30,24 +30,29 @@ function Courses() {
     }
   };
 
-// Filter courses by search AND category (from footer link query param)
-  const filtered = courses.filter((c) => {
-    const title = c.title || "";
-    const description = c.description || "";
-    const matchesSearch =
-      title.toLowerCase().includes(search.toLowerCase()) ||
-      description.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory =
-      !category ||
-      (c.category || "").toLowerCase() === category.toLowerCase();
-    return matchesSearch && matchesCategory;
-  });
+  // Filter courses by search AND category (from footer link query param)
+  const filtered = useMemo(() => {
+    return courses.filter((c) => {
+      const title = c.title || "";
+      const description = c.description || "";
+      const matchesSearch =
+        title.toLowerCase().includes(search.toLowerCase()) ||
+        description.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory =
+        !category ||
+        (c.category || "").toLowerCase() === category.toLowerCase();
+      return matchesSearch && matchesCategory;
+    });
+  }, [courses, search, category]);
 
-  const categoryCount = category
-    ? courses.filter(
+  const categoryCount = useMemo(() => {
+    if (category) {
+      return courses.filter(
         (c) => (c.category || "").toLowerCase() === category.toLowerCase()
-      ).length
-    : courses.length;
+      ).length;
+    }
+    return courses.length;
+  }, [courses, category]);
 
   return (
     <div>
@@ -76,7 +81,7 @@ function Courses() {
       </div>
 
       {loading ? (
-        <Loader label="Loading courses..." />
+        <CourseGridSkeleton count={6} />
       ) : error ? (
         <div className="text-center py-16">
           <p className="text-red-500">{error}</p>

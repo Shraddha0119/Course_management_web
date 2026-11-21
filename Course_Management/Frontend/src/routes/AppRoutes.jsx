@@ -1,38 +1,43 @@
+import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
+import Loader from "../components/Loader";
 
-import Home from "../pages/Home";
-import Login from "../pages/Login";
-import Register from "../pages/Register";
-import Courses from "../pages/Courses";
-import CourseDetails from "../pages/CourseDetails";
-import Dashboard from "../pages/Dashboard";
-import StudentDashboard from "../pages/StudentDashboard";
-import MyCourses from "../pages/MyCourses";
-import Learning from "../pages/Learning";
-import CreateCourse from "../pages/CreateCourse";
-import EditCourse from "../pages/EditCourse";
-import NotFound from "../pages/NotFound";
+// Lazy load all pages for code splitting
+const Home = React.lazy(() => import("../pages/Home"));
+const Login = React.lazy(() => import("../pages/Login"));
+const Register = React.lazy(() => import("../pages/Register"));
+const Courses = React.lazy(() => import("../pages/Courses"));
+const CourseDetails = React.lazy(() => import("../pages/CourseDetails"));
+const Dashboard = React.lazy(() => import("../pages/Dashboard"));
+const StudentDashboard = React.lazy(() => import("../pages/StudentDashboard"));
+const MyCourses = React.lazy(() => import("../pages/MyCourses"));
+const Learning = React.lazy(() => import("../pages/Learning"));
+const CreateCourse = React.lazy(() => import("../pages/CreateCourse"));
+const EditCourse = React.lazy(() => import("../pages/EditCourse"));
+const NotFound = React.lazy(() => import("../pages/NotFound"));
 
 function AppRoutes() {
+  const fallback = <Loader label="Loading..." />;
+
   return (
     <BrowserRouter>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<MainLayout><Home /></MainLayout>} />
-        <Route path="/login" element={<MainLayout><Login /></MainLayout>} />
-        <Route path="/register" element={<MainLayout><Register /></MainLayout>} />
-        <Route path="/courses" element={<MainLayout><Courses /></MainLayout>} />
-        <Route path="/courses/:id" element={<MainLayout><CourseDetails /></MainLayout>} />
+        <Route path="/" element={<MainLayout><Suspense fallback={fallback}><Home /></Suspense></MainLayout>} />
+        <Route path="/login" element={<MainLayout><Suspense fallback={fallback}><Login /></Suspense></MainLayout>} />
+        <Route path="/register" element={<MainLayout><Suspense fallback={fallback}><Register /></Suspense></MainLayout>} />
+        <Route path="/courses" element={<MainLayout><Suspense fallback={fallback}><Courses /></Suspense></MainLayout>} />
+        <Route path="/courses/:id" element={<MainLayout><Suspense fallback={fallback}><CourseDetails /></Suspense></MainLayout>} />
 
         {/* Protected - admin & instructor */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute roles={["admin", "instructor"]}>
-              <MainLayout><Dashboard /></MainLayout>
+              <MainLayout><Suspense fallback={fallback}><Dashboard /></Suspense></MainLayout>
             </ProtectedRoute>
           }
         />
@@ -40,7 +45,7 @@ function AppRoutes() {
           path="/create-course"
           element={
             <ProtectedRoute roles={["admin", "instructor"]}>
-              <MainLayout><CreateCourse /></MainLayout>
+              <MainLayout><Suspense fallback={fallback}><CreateCourse /></Suspense></MainLayout>
             </ProtectedRoute>
           }
         />
@@ -48,7 +53,7 @@ function AppRoutes() {
           path="/edit-course/:id"
           element={
             <ProtectedRoute roles={["admin", "instructor"]}>
-              <MainLayout><EditCourse /></MainLayout>
+              <MainLayout><Suspense fallback={fallback}><EditCourse /></Suspense></MainLayout>
             </ProtectedRoute>
           }
         />
@@ -58,7 +63,7 @@ function AppRoutes() {
           path="/student-dashboard"
           element={
             <ProtectedRoute roles={["student"]}>
-              <MainLayout><StudentDashboard /></MainLayout>
+              <MainLayout><Suspense fallback={fallback}><StudentDashboard /></Suspense></MainLayout>
             </ProtectedRoute>
           }
         />
@@ -66,7 +71,7 @@ function AppRoutes() {
           path="/my-courses"
           element={
             <ProtectedRoute roles={["student"]}>
-              <MainLayout><MyCourses /></MainLayout>
+              <MainLayout><Suspense fallback={fallback}><MyCourses /></Suspense></MainLayout>
             </ProtectedRoute>
           }
         />
@@ -74,13 +79,13 @@ function AppRoutes() {
           path="/learn/:courseId"
           element={
             <ProtectedRoute roles={["student"]}>
-              <Learning />
+              <Suspense fallback={fallback}><Learning /></Suspense>
             </ProtectedRoute>
           }
         />
 
         {/* 404 */}
-        <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
+        <Route path="*" element={<MainLayout><Suspense fallback={fallback}><NotFound /></Suspense></MainLayout>} />
       </Routes>
     </BrowserRouter>
   );

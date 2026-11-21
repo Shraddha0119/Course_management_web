@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
-import Loader from "../components/Loader";
+import { CourseDetailsSkeleton } from "../components/Loader";
 import { toast } from "react-hot-toast";
 
 function CourseDetails() {
@@ -21,7 +21,7 @@ function CourseDetails() {
   const fetchCourse = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get(`/courses/${id}`);
+      const { data } = await api.getCached(`/courses/${id}`);
       setCourse(data);
     } catch (err) {
       setError(err.response?.data?.message || "Course not found");
@@ -54,7 +54,7 @@ function CourseDetails() {
     0
   );
 
-  if (loading) return <Loader label="Loading course..." />;
+  if (loading) return <CourseDetailsSkeleton />;
   if (error)
     return (
       <div className="text-center py-16">

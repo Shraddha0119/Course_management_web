@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext, useEffect, useMemo, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import api from "../services/api";
 
@@ -18,7 +18,7 @@ function AuthProvider({ children }) {
   }, []);
 
   // LOGIN
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     setLoading(true);
     try {
       const { data } = await api.post("/auth/login", { email, password });
@@ -35,10 +35,10 @@ function AuthProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // REGISTER
-  const register = async (formData) => {
+  const register = useCallback(async (formData) => {
     setLoading(true);
     try {
       const { data } = await api.post("/auth/register", formData);
@@ -51,19 +51,25 @@ function AuthProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // LOGOUT
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setToken(null);
     setUser(null);
     toast.success("Logged out successfully");
-  };
+  }, []);
+
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({ user, token, loading, login, register, logout }),
+    [user, token, loading, login, register, logout]
+  );
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
