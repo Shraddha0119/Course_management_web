@@ -31,7 +31,7 @@ function AIChatbot() {
       {/* Floating button */}
       <button
         onClick={toggle}
-        className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-2xl flex items-center justify-center hover:scale-110 transition-transform"
+        className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 text-white shadow-2xl flex items-center justify-center hover:scale-110 transition-transform"
         aria-label="AI Assistant"
       >
         {open ? (
@@ -49,11 +49,11 @@ function AIChatbot() {
       {open && (
         <div
           className={`fixed right-5 bottom-24 z-50 w-[92vw] max-w-sm bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all ${
-            minimized ? "h-14" : "h-[520px]"
+            minimized ? "h-14" : "h-130"
           }`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-700 text-white">
+          <div className="flex items-center justify-between px-4 py-3 bg-linear-to-r from-indigo-600 to-purple-700 text-white">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 🤖

@@ -79,7 +79,7 @@ function CourseDetails() {
 
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
         {/* Banner with thumbnail */}
-        <div className="h-64 bg-gradient-to-r from-blue-600 to-indigo-600 relative">
+        <div className="h-64 bg-linear-to-r from-blue-600 to-indigo-600 relative">
           {course.thumbnail ? (
             <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
           ) : (
@@ -87,8 +87,8 @@ function CourseDetails() {
               <span className="text-8xl font-bold">{course.title?.charAt(0).toUpperCase()}</span>
             </div>
           )}
-          <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute bottom-4 left-6">
+          <div className="absolute bottom-0 inset-x-0 h-24 bg-linear-to-t from-black/60 to-transparent" />
+            <div className="absolute bottom-4 left-6">
             <h1 className="text-3xl font-bold text-white drop-shadow">{course.title}</h1>
           </div>
         </div>

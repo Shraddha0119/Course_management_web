@@ -66,7 +66,7 @@ function FeatureCard({ f, index }) {
       style={{ transitionDelay: `${(index % 3) * 80}ms` }}
     >
       <div
-        className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center text-3xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-transform`}
+        className={`w-14 h-14 rounded-2xl bg-gradient-to-br${f.color} flex items-center justify-center text-3xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-transform`}
       >
         {f.icon}
       </div>

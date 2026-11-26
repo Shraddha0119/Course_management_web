@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import useAIChat from "../hooks/useAIChat";
 import { useAuth } from "../context/AuthContext";
 
@@ -26,12 +25,9 @@ function AIChatPanel({
     input,
     setInput,
     sendMessage,
-    clearChat,
     handleKeyDown,
     endRef,
   } = useAIChat({ persist });
-
-  const inputRef = useRef(null);
 
   const defaultSuggestions = [
     "Explain React useState with an example",
@@ -41,6 +37,16 @@ function AIChatPanel({
   ];
 
   const chips = suggestions.length ? suggestions : defaultSuggestions;
+
+  const renderInlineText = (text) => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        return <strong key={i}>{part.slice(2, -2)}</strong>;
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
 
   const renderText = (text) => {
     if (!text) return null;
@@ -59,13 +65,13 @@ function AIChatPanel({
         );
       }
       // text with bold
-      const withBold = part.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
       return (
         <div
           key={i}
           className="whitespace-pre-wrap"
-          dangerouslySetInnerHTML={{ __html: withBold }}
-        />
+        >
+          {renderInlineText(part)}
+        </div>
       );
     });
   };
@@ -109,7 +115,7 @@ function AIChatPanel({
             <div
               className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm ${
                 m.role === "user"
-                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-sm"
+                  ? "bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-br-sm"
                   : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-100 rounded-bl-sm"
               }`}
             >
@@ -133,10 +139,9 @@ function AIChatPanel({
       </div>
 
       {/* Input */}
-      <div className={`p-${compact ? 2 : 3} border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800`}>
+      <div className={`${compact ? "p-2" : "p-3"} border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800`}>
         <div className="flex gap-2">
           <textarea
-            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -147,7 +152,7 @@ function AIChatPanel({
           <button
             onClick={() => sendMessage()}
             disabled={!input.trim() || typing}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white px-4 rounded-xl font-bold transition-colors"
+            className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white px-4 rounded-xl font-bold transition-colors"
           >
             ➤
           </button>

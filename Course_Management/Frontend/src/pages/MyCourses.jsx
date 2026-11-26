@@ -56,7 +56,7 @@ function MyCourses() {
           {courses.map((course) => (
             <div key={course._id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all">
               {/* Thumbnail */}
-              <div className="h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-4xl font-bold">
+              <div className="h-40 bg-gradient-to-br- from-blue-500 to-indigo-600 flex items-center justify-center text-white text-4xl font-bold">
                 {course.thumbnail ? (
                   <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" loading="lazy" />
                 ) : (
